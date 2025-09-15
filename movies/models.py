@@ -18,4 +18,16 @@ class Review(models.Model):
         on_delete=models.CASCADE)
     def __str__(self):
         return str(self.id) + ' - ' + self.movie.name
+
+class ReviewFunnyVote(models.Model):
+    review = models.ForeignKey(Review, on_delete=models.CASCADE, related_name='funny_votes')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='funny_votes')
+    created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('review', 'user')
+
+    def __str__(self):
+        return f"FunnyVote(user={self.user_id}, review={self.review_id})"
+
 # Create your models here.

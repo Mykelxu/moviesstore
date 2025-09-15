@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container py-4">
+  <h2 class="mb-3">Top Comments (Funniest)</h2>
+  <p class="text-muted">Sorted by funny votes, then newest.</p>
+  <ul class="list-group">
+    {% for r in template_data.reviews %}
+      <li class="list-group-item">
+        <div class="d-flex justify-content-between">
+          <div>
+            <strong>{{ r.user.username }}</strong>
+            <span class="text-muted">on</span>
+            <em>{{ r.movie.name }}</em>
+          </div>
+          <small class="text-muted">😂 {{ r.num_funny }}</small>
+        </div>
+        <p class="mt-2 mb-0">{{ r.comment }}</p>
+        <small class="text-muted">{{ r.date|date:"Y-m-d H:i" }}</small>
+      </li>
+    {% empty %}
+      <li class="list-group-item">No comments yet.</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock content %}

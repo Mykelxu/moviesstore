@@ -41,6 +41,17 @@
               {{ review.date }}
             </h6>
             <p class="card-text">{{ review.comment }}</p>
+            <div class="d-flex align-items-center gap-2 mb-2">
+      <span class="badge bg-secondary">😂 {{ review.num_funny|default:review.funny_votes.count }}</span>
+      {% if user.is_authenticated %}
+      <form method="post" action="{% url 'movies.toggle_funny' id=template_data.movie.id review_id=review.id %}">
+        {% csrf_token %}
+        <button class="btn btn-sm btn-outline-dark" type="submit">Mark Funny / Unmark</button>
+      </form>
+      {% else %}
+      <small class="text-muted">Log in to vote funny</small>
+      {% endif %}
+    </div>
             {% if user.is_authenticated and user == review.user %}
             <a class="btn btn-primary" href="{% url 'movies.edit_review' id=template_data.movie.id review_id=review.id %}">Edit
             </a>
