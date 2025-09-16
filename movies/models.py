@@ -30,4 +30,15 @@ class ReviewFunnyVote(models.Model):
     def __str__(self):
         return f"FunnyVote(user={self.user_id}, review={self.review_id})"
 
+class HiddenMovie(models.Model):
+    movie = models.ForeignKey('Movie', on_delete=models.CASCADE, related_name='hidden_by')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='movie_hides')
+    created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('movie', 'user')  # one hide per user per movie
+
+    def __str__(self):
+        return f"Hidden(movie={self.movie_id}, user={self.user_id})"
+
 # Create your models here.

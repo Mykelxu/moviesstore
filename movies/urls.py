@@ -9,4 +9,7 @@ urlpatterns = [
         views.delete_review, name='movies.delete_review'),
     path('top-comments/', views.top_funny_comments, name='movies.top_comments'),
     path('<int:id>/review/<int:review_id>/funny/', views.toggle_funny, name='movies.toggle_funny'),
+    path('hidden/', views.hidden_movies, name='movies.hidden'),
+    path('<int:id>/hide/', views.hide_movie, name='movies.hide'),
+    path('<int:id>/unhide/', views.unhide_movie, name='movies.unhide'),
 ]

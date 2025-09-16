@@ -36,6 +36,11 @@
           <div class="card-body text-center">
             <a href="{% url 'movies.show' id=movie.id %}"
               class="btn bg-dark text-white">
+            <form method="post" action="{% url 'movies.hide' id=movie.id %}" class="d-inline">
+  {% csrf_token %}
+  <button class="btn btn-sm btn-outline-secondary" type="submit">Hide</button>
+</form>
+
             {{ movie.name }}
             </a>
           </div>

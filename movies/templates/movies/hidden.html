@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container py-4">
+  <h2 class="mb-3">Hidden Movies</h2>
+  <ul class="list-group">
+    {% for movie in template_data.movies %}
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <div>
+          <strong>{{ movie.name }}</strong>
+          {% if movie.description %}<div class="text-muted small">{{ movie.description|truncatechars:120 }}</div>{% endif %}
+        </div>
+        <form method="post" action="{% url 'movies.unhide' id=movie.id %}">
+          {% csrf_token %}
+          <button class="btn btn-sm btn-primary" type="submit">Unhide</button>
+        </form>
+      </li>
+    {% empty %}
+      <li class="list-group-item">No hidden movies.</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

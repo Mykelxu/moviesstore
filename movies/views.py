@@ -3,18 +3,15 @@ from .models import Movie, Review
 from django.contrib.auth.decorators import login_required
 from django.db.models.functions import Length
 from django.db.models import Count
-from .models import Movie, Review, ReviewFunnyVote
+from .models import Movie, Review, ReviewFunnyVote, HiddenMovie
 def index(request):
-    search_term = request.GET.get('search')
-    if search_term:
-        movies = Movie.objects.filter(name__icontains=search_term)
-    else:
-        movies = Movie.objects.all()
-    template_data = {}
-    template_data['title'] = 'Movies'
-    template_data['movies'] = movies
-    return render(request, 'movies/index.html',
-                  {'template_data': template_data})
+    movies = Movie.objects.all()
+    if request.user.is_authenticated:
+        movies = movies.exclude(
+            id__in=HiddenMovie.objects.filter(user=request.user).values('movie_id')
+        )
+    template_data = {'title': 'Movies', 'movies': movies}
+    return render(request, 'movies/index.html', {'template_data': template_data})
 def show(request, id):
     movie = Movie.objects.get(id=id)
     reviews = (
@@ -86,5 +83,27 @@ def top_funny_comments(request):
     )
     template_data = {'title': 'Top Comments (Funniest)', 'reviews': reviews}
     return render(request, 'movies/top_comments.html', {'template_data': template_data})
+
+@login_required
+def hidden_movies(request):
+    movies = Movie.objects.filter(hidden_by__user=request.user).distinct()
+    template_data = {'title': 'Hidden Movies', 'movies': movies}
+    return render(request, 'movies/hidden.html', {'template_data': template_data})
+
+@login_required
+def hide_movie(request, id):
+    if request.method == 'POST':
+        movie = get_object_or_404(Movie, id=id)
+        HiddenMovie.objects.get_or_create(movie=movie, user=request.user)
+    return redirect('movies.index')
+
+@login_required
+def unhide_movie(request, id):
+    if request.method == 'POST':
+        movie = get_object_or_404(Movie, id=id)
+        HiddenMovie.objects.filter(movie=movie, user=request.user).delete()
+    # If you unhide from the hidden page, keep them there:
+    return redirect('movies.hidden')
+
 
 # Create your views here.
