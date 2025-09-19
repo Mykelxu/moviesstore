@@ -12,4 +12,7 @@ urlpatterns = [
     path('hidden/', views.hidden_movies, name='movies.hidden'),
     path('<int:id>/hide/', views.hide_movie, name='movies.hide'),
     path('<int:id>/unhide/', views.unhide_movie, name='movies.unhide'),
+    path('petitions/', views.petitions_index, name='movies.petitions'),
+    path('petitions/new/', views.petitions_new, name='movies.petitions_new'),
+    path('petitions/<int:petition_id>/vote/', views.petitions_vote, name='movies.petitions_vote'),
 ]

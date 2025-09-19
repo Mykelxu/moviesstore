@@ -3,7 +3,7 @@ from .models import Movie, Review
 from django.contrib.auth.decorators import login_required
 from django.db.models.functions import Length
 from django.db.models import Count
-from .models import Movie, Review, ReviewFunnyVote, HiddenMovie
+from .models import Movie, Review, ReviewFunnyVote, HiddenMovie, Petition, PetitionVote
 def index(request):
     movies = Movie.objects.all()
     if request.user.is_authenticated:
@@ -104,6 +104,32 @@ def unhide_movie(request, id):
         HiddenMovie.objects.filter(movie=movie, user=request.user).delete()
     # If you unhide from the hidden page, keep them there:
     return redirect('movies.hidden')
+
+def petitions_index(request):
+    petitions = (Petition.objects
+                 .annotate(yes_count=Count('votes', distinct=True))
+                 .order_by('-yes_count', '-created'))
+    return render(request, 'movies/petitions_index.html',
+                  {'template_data': {'title': 'Petitions', 'petitions': petitions}})
+
+@login_required
+def petitions_new(request):
+    if request.method == 'POST':
+        title = (request.POST.get('movie_title') or '').strip()
+        details = (request.POST.get('details') or '').strip()
+        if title:
+            Petition.objects.create(movie_title=title, details=details, requested_by=request.user)
+            return redirect('movies.petitions')
+    return render(request, 'movies/petitions_new.html',
+                  {'template_data': {'title': 'New Petition'}})
+
+@login_required
+def petitions_vote(request, petition_id):
+    # Idempotent "Yes" vote: creates if missing; if already voted, do nothing
+    if request.method == 'POST':
+        petition = get_object_or_404(Petition, id=petition_id)
+        PetitionVote.objects.get_or_create(petition=petition, user=request.user)
+    return redirect('movies.petitions')
 
 
 # Create your views here.

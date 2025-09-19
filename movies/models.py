@@ -42,3 +42,20 @@ class HiddenMovie(models.Model):
         return f"Hidden(movie={self.movie_id}, user={self.user_id})"
 
 # Create your models here.
+
+class Petition(models.Model):
+    movie_title = models.CharField(max_length=255)
+    details = models.TextField(blank=True)            # optional description
+    requested_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='petitions')
+    created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.movie_title
+
+class PetitionVote(models.Model):
+    petition = models.ForeignKey(Petition, on_delete=models.CASCADE, related_name='votes')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='petition_votes')
+    created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('petition', 'user')       # 1 affirmative vote per user per petition
