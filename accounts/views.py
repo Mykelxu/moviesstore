@@ -1,10 +1,12 @@
 from django.shortcuts import render
 from django.contrib.auth import login as auth_login, authenticate, logout as auth_logout
-from .forms import CustomUserCreationForm, CustomErrorList
+from .forms import CustomUserCreationForm, CustomErrorList, ProfileForm
 from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from .models import Profile
+
 @login_required
 def logout(request):
     auth_logout(request)
@@ -51,4 +53,24 @@ def orders(request):
     template_data['orders'] = request.user.order_set.all()
     return render(request, 'accounts/orders.html',
         {'template_data': template_data})
+
+@login_required
+def profile(request):
+    profile_obj, created = Profile.objects.get_or_create(user=request.user)
+
+    if request.method == 'POST':
+        form = ProfileForm(request.POST, request.FILES, instance=profile_obj)
+        if form.is_valid():
+            form.save()
+            return redirect('accounts.profile')
+    else:
+        form = ProfileForm(instance=profile_obj)
+
+    template_data = {
+        'title': 'My Profile',
+        'form': form,
+        'profile': profile_obj,
+    }
+    return render(request, 'accounts/profile.html', {'template_data': template_data})
+
 # Create your views here.
