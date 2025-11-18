@@ -15,4 +15,7 @@ urlpatterns = [
     path('petitions/', views.petitions_index, name='movies.petitions'),
     path('petitions/new/', views.petitions_new, name='movies.petitions_new'),
     path('petitions/<int:petition_id>/vote/', views.petitions_vote, name='movies.petitions_vote'),
+    path('watchlist/', views.watchlist_index, name='movies.watchlist'),
+    path('<int:id>/watchlist/add/', views.watchlist_add, name='movies.watchlist_add'),
+    path('<int:id>/watchlist/remove/', views.watchlist_remove, name='movies.watchlist_remove'),
 ]

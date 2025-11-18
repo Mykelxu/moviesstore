@@ -3,7 +3,7 @@ from .models import Movie, Review
 from django.contrib.auth.decorators import login_required
 from django.db.models.functions import Length
 from django.db.models import Count
-from .models import Movie, Review, ReviewFunnyVote, HiddenMovie, Petition, PetitionVote
+from .models import Movie, Review, ReviewFunnyVote, HiddenMovie, Petition, PetitionVote, WatchlistEntry
 def index(request):
     movies = Movie.objects.all()
     if request.user.is_authenticated:
@@ -20,10 +20,15 @@ def show(request, id):
         .annotate(num_funny=Count('funny_votes', distinct=True))
         .order_by('-date')  # keep your existing order; we just add the count
     )
+    is_in_watchlist = False
+    if request.user.is_authenticated:
+        is_in_watchlist = WatchlistEntry.objects.filter(user=request.user, movie=movie).exists()
     template_data = {
         'title': movie.name,
         'movie': movie,
         'reviews': reviews,
+        'is_in_watchlist': is_in_watchlist,
+
     }
     return render(request, 'movies/show.html', {'template_data': template_data})
 @login_required
@@ -130,6 +135,31 @@ def petitions_vote(request, petition_id):
         petition = get_object_or_404(Petition, id=petition_id)
         PetitionVote.objects.get_or_create(petition=petition, user=request.user)
     return redirect('movies.petitions')
+
+@login_required
+def watchlist_index(request):
+    movies = Movie.objects.filter(watchlist_entries__user=request.user).distinct()
+    template_data = {
+        'title': 'My Watchlist',
+        'movies': movies,
+    }
+    return render(request, 'movies/watchlist.html', {'template_data': template_data})
+
+
+@login_required
+def watchlist_add(request, id):
+    if request.method == 'POST':
+        movie = get_object_or_404(Movie, id=id)
+        WatchlistEntry.objects.get_or_create(user=request.user, movie=movie)
+    return redirect('movies.show', id=id)
+
+
+@login_required
+def watchlist_remove(request, id):
+    if request.method == 'POST':
+        movie = get_object_or_404(Movie, id=id)
+        WatchlistEntry.objects.filter(user=request.user, movie=movie).delete()
+    return redirect('movies.show', id=id)
 
 
 # Create your views here.

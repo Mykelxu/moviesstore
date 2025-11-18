@@ -59,3 +59,14 @@ class PetitionVote(models.Model):
 
     class Meta:
         unique_together = ('petition', 'user')       # 1 affirmative vote per user per petition
+
+class WatchlistEntry(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='watchlist_entries')
+    movie = models.ForeignKey(Movie, on_delete=models.CASCADE, related_name='watchlist_entries')
+    created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'movie')
+
+    def __str__(self):
+        return f"WatchlistEntry(user={self.user_id}, movie={self.movie_id})"
